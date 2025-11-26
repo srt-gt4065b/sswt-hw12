@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galaga Leaderboard - Student Rankings</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px 20px;
+            background: rgba(0, 255, 0, 0.1);
+            border: 3px solid #00ff00;
+            border-radius: 15px;
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.3);
+        }
+
+        .title {
+            font-size: 48px;
+            color: #ff0;
+            text-shadow: 0 0 20px #ff0, 0 0 30px #ff0;
+            margin-bottom: 10px;
+            letter-spacing: 5px;
+        }
+
+        .subtitle {
+            font-size: 20px;
+            color: #0ff;
+            letter-spacing: 2px;
+        }
+
+        .stats-bar {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid #00ff00;
+            border-radius: 10px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            margin: 10px;
+            background: rgba(0, 255, 0, 0.1);
+            border-radius: 8px;
+            min-width: 150px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #0ff;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            color: #ff0;
+            font-weight: bold;
+            text-shadow: 0 0 10px #ff0;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .btn {
+            background: linear-gradient(145deg, #00ff00, #00cc00);
+            color: #000;
+            border: none;
+            padding: 12px 25px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            background: linear-gradient(145deg, #00ffff, #00cccc);
+            box-shadow: 0 0 25px rgba(0, 255, 255, 0.8);
+            transform: translateY(-2px);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(145deg, #0ff, #0cc);
+        }
+
+        .search-box {
+            padding: 12px 20px;
+            font-size: 16px;
+            border: 2px solid #00ff00;
+            background: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            width: 300px;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: #0ff;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+        }
+
+        .table-container {
+            background: rgba(0, 0, 0, 0.8);
+            border: 3px solid #00ff00;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.3);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: rgba(0, 255, 0, 0.2);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        th {
+            padding: 15px;
+            text-align: left;
+            color: #0ff;
+            font-size: 16px;
+            border-bottom: 2px solid #00ff00;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.3s;
+        }
+
+        th:hover {
+            background: rgba(0, 255, 255, 0.2);
+        }
+
+        th.sortable::after {
+            content: ' ⬍';
+            font-size: 12px;
+            color: #888;
+        }
+
+        th.sort-asc::after {
+            content: ' ▲';
+            color: #0ff;
+        }
+
+        th.sort-desc::after {
+            content: ' ▼';
+            color: #0ff;
+        }
+
+        tr {
+            border-bottom: 1px solid #333;
+            transition: background 0.3s;
+        }
+
+        tbody tr:hover {
+            background: rgba(0, 255, 0, 0.1);
+        }
+
+        td {
+            padding: 15px;
+            font-size: 16px;
+        }
+
+        .rank-cell {
+            text-align: center;
+            font-weight: bold;
+            font-size: 20px;
+        }
+
+        .rank-1 { color: #ffd700; }
+        .rank-2 { color: #c0c0c0; }
+        .rank-3 { color: #cd7f32; }
+
+        .student-id {
+            color: #0ff;
+            font-weight: bold;
+        }
+
+        .score {
+            color: #ff0;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .stage {
+            color: #0f0;
+        }
+
+        .date {
+            color: #888;
+            font-size: 14px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            font-size: 24px;
+            color: #0ff;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 50px;
+            font-size: 20px;
+            color: #888;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+
+        .status-online {
+            background: #0f0;
+            box-shadow: 0 0 10px #0f0;
+        }
+
+        .status-offline {
+            background: #f00;
+            box-shadow: 0 0 10px #f00;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: #888;
+            font-size: 14px;
+        }
+
+        .highlight-row {
+            animation: highlightFade 2s ease-out;
+        }
+
+        @keyframes highlightFade {
+            0% { background: rgba(255, 255, 0, 0.3); }
+            100% { background: transparent; }
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-tab {
+            padding: 10px 20px;
+            background: rgba(0, 255, 0, 0.1);
+            border: 2px solid #00ff00;
+            border-radius: 8px;
+            color: #0ff;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+
+        .filter-tab:hover {
+            background: rgba(0, 255, 0, 0.2);
+        }
+
+        .filter-tab.active {
+            background: #00ff00;
+            color: #000;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .title {
+                font-size: 32px;
+            }
+
+            .subtitle {
+                font-size: 16px;
+            }
+
+            .search-box {
+                width: 100%;
+            }
+
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            table {
+                font-size: 14px;
+            }
+
+            th, td {
+                padding: 10px 5px;
+            }
+
+            .stat-value {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">🏆 GALAGA LEADERBOARD 🏆</h1>
+            <p class="subtitle">Student Rankings - Space Monster Defense</p>
+            <div style="margin-top: 15px; font-size: 14px;">
+                <span class="status-indicator" id="statusIndicator"></span>
+                <span id="statusText">Connecting...</span>
+            </div>
+        </div>
+
+        <div class="stats-bar">
+            <div class="stat-item">
+                <div class="stat-label">Total Players</div>
+                <div class="stat-value" id="totalPlayers">0</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">Highest Score</div>
+                <div class="stat-value" id="highestScore">0</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">Stage 10 Cleared</div>
+                <div class="stat-value" id="stage10Count">0</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">Last Updated</div>
+                <div class="stat-value" id="lastUpdated" style="font-size: 18px;">--:--</div>
+            </div>
+        </div>
+
+        <div class="filter-tabs">
+            <div class="filter-tab active" onclick="filterScores('all')">All Scores</div>
+            <div class="filter-tab" onclick="filterScores('top')">Top 10</div>
+            <div class="filter-tab" onclick="filterScores('stage10')">Stage 10 Only</div>
+            <div class="filter-tab" onclick="filterScores('today')">Today</div>
+        </div>
+
+        <div class="controls">
+            <input type="text" class="search-box" id="searchBox" placeholder="Search by Student ID or Name...">
+            <div>
+                <button class="btn" onclick="loadLeaderboard()">🔄 Refresh</button>
+                <button class="btn btn-secondary" onclick="exportToCSV()">📊 Export CSV</button>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table id="leaderboardTable">
+                <thead>
+                    <tr>
+                        <th class="sortable" onclick="sortTable('rank')">Rank</th>
+                        <th class="sortable" onclick="sortTable('studentId')">Student ID</th>
+                        <th class="sortable" onclick="sortTable('name')">Name</th>
+                        <th class="sortable" onclick="sortTable('score')">Score</th>
+                        <th class="sortable" onclick="sortTable('stage')">Stage</th>
+                        <th class="sortable" onclick="sortTable('date')">Date</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboardBody">
+                    <tr>
+                        <td colspan="6" class="loading">Loading data...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="footer">
+            <p>🎮 Galaga Game Leaderboard System</p>
+            <p>Auto-refresh every 30 seconds | Last refresh: <span id="lastRefresh">--:--:--</span></p>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let allScores = [];
+        let filteredScores = [];
+        let currentFilter = 'all';
+        let currentSort = { column: 'score', direction: 'desc' };
+        let autoRefreshInterval;
+
+        // LocalStorage fallback
+        const LocalScores = {
+            getAll: function() {
+                const data = localStorage.getItem('galagaScores');
+                return data ? JSON.parse(data) : [];
+            }
+        };
+
+        // Update status indicator
+        function updateStatus(isOnline) {
+            const indicator = document.getElementById('statusIndicator');
+            const text = document.getElementById('statusText');
+            
+            if (isOnline) {
+                indicator.className = 'status-indicator status-online';
+                text.textContent = 'Online - Firebase Connected';
+                text.style.color = '#0f0';
+            } else {
+                indicator.className = 'status-indicator status-offline';
+                text.textContent = 'Offline - Local Data Only';
+                text.style.color = '#f00';
+            }
+        }
+
+        // Load leaderboard data
+        async function loadLeaderboard() {
+            console.log('Loading leaderboard...');
+            
+            try {
+                // Try to load from Firebase (if configured)
+                // For now, use localStorage
+                const scores = LocalScores.getAll();
+                
+                if (scores.length === 0) {
+                    document.getElementById('leaderboardBody').innerHTML = 
+                        '<tr><td colspan="6" class="no-data">No scores yet. Start playing to see rankings!</td></tr>';
+                    updateStats([]);
+                    updateStatus(false);
+                    return;
+                }
+
+                allScores = scores;
+                filterScores(currentFilter);
+                updateStats(scores);
+                updateStatus(false);
+                updateLastRefresh();
+                
+                console.log(`Loaded ${scores.length} scores`);
+            } catch (error) {
+                console.error('Error loading leaderboard:', error);
+                document.getElementById('leaderboardBody').innerHTML = 
+                    '<tr><td colspan="6" class="no-data">Error loading data. Please refresh the page.</td></tr>';
+                updateStatus(false);
+            }
+        }
+
+        // Filter scores
+        function filterScores(filterType) {
+            currentFilter = filterType;
+            
+            // Update active tab
+            document.querySelectorAll('.filter-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            let filtered = [...allScores];
+
+            switch(filterType) {
+                case 'top':
+                    filtered = filtered.sort((a, b) => b.score - a.score).slice(0, 10);
+                    break;
+                case 'stage10':
+                    filtered = filtered.filter(s => s.stage >= 10);
+                    break;
+                case 'today':
+                    const today = new Date().toDateString();
+                    filtered = filtered.filter(s => {
+                        const scoreDate = new Date(s.date || s.timestamp);
+                        return scoreDate.toDateString() === today;
+                    });
+                    break;
+            }
+
+            filteredScores = filtered;
+            sortTable(currentSort.column, true);
+        }
+
+        // Sort table
+        function sortTable(column, skipToggle = false) {
+            if (!skipToggle && currentSort.column === column) {
+                currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSort.column = column;
+                currentSort.direction = column === 'score' || column === 'stage' ? 'desc' : 'asc';
+            }
+
+            // Update sort indicators
+            document.querySelectorAll('th').forEach(th => {
+                th.classList.remove('sort-asc', 'sort-desc');
+            });
+            
+            const th = event ? event.target : document.querySelector(`th[onclick*="${column}"]`);
+            if (th) {
+                th.classList.add(currentSort.direction === 'asc' ? 'sort-asc' : 'sort-desc');
+            }
+
+            // Sort data
+            filteredScores.sort((a, b) => {
+                let aVal, bVal;
+
+                switch(column) {
+                    case 'rank':
+                    case 'score':
+                    case 'stage':
+                        aVal = a[column] || a.score || 0;
+                        bVal = b[column] || b.score || 0;
+                        break;
+                    case 'studentId':
+                        aVal = (a.studentId || '').toLowerCase();
+                        bVal = (b.studentId || '').toLowerCase();
+                        break;
+                    case 'name':
+                        aVal = (a.playerName || '').toLowerCase();
+                        bVal = (b.playerName || '').toLowerCase();
+                        break;
+                    case 'date':
+                        aVal = new Date(a.date || a.timestamp).getTime();
+                        bVal = new Date(b.date || b.timestamp).getTime();
+                        break;
+                    default:
+                        return 0;
+                }
+
+                if (currentSort.direction === 'asc') {
+                    return aVal > bVal ? 1 : -1;
+                } else {
+                    return aVal < bVal ? 1 : -1;
+                }
+            });
+
+            renderTable();
+        }
+
+        // Render table
+        function renderTable() {
+            const tbody = document.getElementById('leaderboardBody');
+            const searchTerm = document.getElementById('searchBox').value.toLowerCase();
+
+            let displayScores = filteredScores;
+
+            // Apply search filter
+            if (searchTerm) {
+                displayScores = displayScores.filter(score => 
+                    (score.studentId || '').toLowerCase().includes(searchTerm) ||
+                    (score.playerName || '').toLowerCase().includes(searchTerm)
+                );
+            }
+
+            if (displayScores.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="no-data">No matching records found.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = displayScores.map((score, index) => {
+                const rank = index + 1;
+                const rankClass = rank <= 3 ? `rank-${rank}` : '';
+                const rankIcon = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : rank;
+                
+                const date = new Date(score.date || score.timestamp);
+                const dateStr = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+
+                return `
+                    <tr>
+                        <td class="rank-cell ${rankClass}">${rankIcon}</td>
+                        <td class="student-id">${score.studentId || 'N/A'}</td>
+                        <td>${score.playerName || 'Unknown'}</td>
+                        <td class="score">${score.score.toLocaleString()}</td>
+                        <td class="stage">${score.stage}</td>
+                        <td class="date">${dateStr}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Update statistics
+        function updateStats(scores) {
+            document.getElementById('totalPlayers').textContent = scores.length;
+            
+            if (scores.length > 0) {
+                const maxScore = Math.max(...scores.map(s => s.score));
+                document.getElementById('highestScore').textContent = maxScore.toLocaleString();
+                
+                const stage10Count = scores.filter(s => s.stage >= 10).length;
+                document.getElementById('stage10Count').textContent = stage10Count;
+            } else {
+                document.getElementById('highestScore').textContent = '0';
+                document.getElementById('stage10Count').textContent = '0';
+            }
+
+            const now = new Date();
+            document.getElementById('lastUpdated').textContent = 
+                now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+        // Update last refresh time
+        function updateLastRefresh() {
+            const now = new Date();
+            document.getElementById('lastRefresh').textContent = now.toLocaleTimeString();
+        }
+
+        // Search functionality
+        document.getElementById('searchBox').addEventListener('input', () => {
+            renderTable();
+        });
+
+        // Export to CSV
+        function exportToCSV() {
+            const csvContent = [
+                ['Rank', 'Student ID', 'Name', 'Score', 'Stage', 'Date'],
+                ...filteredScores.map((score, index) => [
+                    index + 1,
+                    score.studentId || 'N/A',
+                    score.playerName || 'Unknown',
+                    score.score,
+                    score.stage,
+                    new Date(score.date || score.timestamp).toLocaleString()
+                ])
+            ].map(row => row.join(',')).join('\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `galaga_leaderboard_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Auto-refresh setup
+        function startAutoRefresh() {
+            autoRefreshInterval = setInterval(() => {
+                loadLeaderboard();
+            }, 30000); // Refresh every 30 seconds
+        }
+
+        function stopAutoRefresh() {
+            if (autoRefreshInterval) {
+                clearInterval(autoRefreshInterval);
+            }
+        }
+
+        // Initialize
+        window.addEventListener('load', () => {
+            loadLeaderboard();
+            startAutoRefresh();
+        });
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            stopAutoRefresh();
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'F5' || (e.ctrlKey && e.key === 'r')) {
+                e.preventDefault();
+                loadLeaderboard();
+            }
+        });
+    </script>
+
+    <script type="module">
+        // Firebase configuration - FILL IN YOUR FIREBASE CONFIG HERE
+        /*
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getDatabase, ref, query, orderByChild, onValue } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDKHFod7Hr8qeUgUb052Ir3DCxF0ZRb6To",
+  authDomain: "sswt2025fall.firebaseapp.com",
+  databaseURL: "https://sswt2025fall-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "sswt2025fall",
+  storageBucket: "sswt2025fall.firebasestorage.app",
+  messagingSenderId: "304733564282",
+  appId: "1:304733564282:web:e8ec392e6fe4bf871dbac3",
+  measurementId: "G-RRWD5Z2C16"
+        };
+
+        try {
+            console.log('🔥 Initializing Firebase...');
+            const app = initializeApp(firebaseConfig);
+            const database = getDatabase(app);
+            
+            // Real-time listener for scores
+            const scoresRef = ref(database, 'scores');
+            const scoresQuery = query(scoresRef, orderByChild('score'));
+            
+            onValue(scoresQuery, (snapshot) => {
+                if (snapshot.exists()) {
+                    const scores = [];
+                    snapshot.forEach((childSnapshot) => {
+                        scores.push(childSnapshot.val());
+                    });
+                    
+                    allScores = scores;
+                    filterScores(currentFilter);
+                    updateStats(scores);
+                    updateStatus(true);
+                    updateLastRefresh();
+                    
+                    console.log('✅ Real-time update:', scores.length, 'scores');
+                } else {
+                    allScores = [];
+                    filterScores(currentFilter);
+                    updateStats([]);
+                    updateStatus(true);
+                }
+            }, (error) => {
+                console.error('❌ Firebase error:', error);
+                updateStatus(false);
+                // Fallback to localStorage
+                window.loadLeaderboard();
+            });
+            
+            console.log('✅ Firebase real-time listener activated!');
+            
+        } catch (error) {
+            console.error('❌ Firebase initialization failed:', error);
+            updateStatus(false);
+        }
+        */
+        
+        // Firebase is disabled - using local storage only
+        console.log('💾 Running in local storage mode');
+        console.log('ℹ️ To enable Firebase: Uncomment the Firebase code above and add your config');
+        updateStatus(false);
+    </script>
+</body>
+</html>
