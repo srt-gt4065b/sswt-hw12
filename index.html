@@ -732,7 +732,7 @@
                     window.useLocalStorage = false;
                 } catch (error) {
                     console.error('❌ Firebase save failed, using local storage only:', error.message);
-                    window.useLocalStorage = true;
+                    window.useLocalStorage = false;
                 }
             };
 
@@ -828,7 +828,7 @@
                         `;
                     }
                     
-                    window.useLocalStorage = true;
+                    window.useLocalStorage = false;
                 }
             };
 
@@ -855,14 +855,14 @@
         } catch (error) {
             console.error('❌ Firebase initialization failed:', error.message);
             console.warn('⚠️ Switching to local storage mode');
-            window.useLocalStorage = true;
+            window.useLocalStorage = false;
         }
         
         
         // Firebase is disabled - using local storage only
         console.log('💾 Running in local storage mode');
         console.log('ℹ️ To enable Firebase: Uncomment the Firebase code above and add your config');
-        window.useLocalStorage = true;
+        window.useLocalStorage = false;
     </script>
 
     <script>
